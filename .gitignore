@@ -12,6 +12,9 @@ testing/plots/
 # Generated GIFs from solver visualisation
 *.gif
 
+report.pdf
+report.typ
+
 # Generation provenance index — regenerable via generate_batch.py
 levels/generated/
 
