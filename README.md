@@ -9,7 +9,7 @@ An Algorithmic Engineering study comparing constraint-solving approaches on [Hex
 Hexcells puzzles are binary constraint satisfaction problems: each cell is a mine or empty, and numbered hints constrain counts within neighbourhoods and lines. This project explores how different solving strategies — from cheap local propagation to full IP/SMT — compare in speed and coverage.
 
 **Solvers implemented:**
-- `SHP` — (single-hint propagation) puzzle-specific propagation rules
+- `PSPR` — (SHP single-hint propagation) puzzle-specific propagation rules
 - `AC3` — pairwise interval-bound propagation over overlapping hint scopes
 - `Gurobi` — incremental Integer Programming (force-checking via LP)
 - `Z3` — incremental SMT (force-checking via push/pop)
