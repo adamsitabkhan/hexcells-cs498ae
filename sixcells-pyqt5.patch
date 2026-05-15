@@ -1,0 +1,70 @@
+diff --git a/common.py b/common.py
+index b887d5f..177b6d3 100644
+--- a/common.py
++++ b/common.py
+@@ -29,11 +29,11 @@ import contextlib
+ 
+ from util import *
+ 
+-from universal_qt import PySide, PyQt4, PyQt5
+-import qt
+-from qt.core import QByteArray, QEvent, QPointF, QRect, QUrl
+-from qt.gui import QBrush, QColor, QCursor, QDesktopServices, QMouseEvent, QPainter, QPen, QPolygonF
+-from qt.widgets import QAction, QActionGroup, QApplication, QFileDialog, QGraphicsPolygonItem, QGraphicsScene, QGraphicsSimpleTextItem, QGraphicsView, QMainWindow, QMessageBox, QGraphicsItem
++
++from PyQt5.QtCore import Qt as qt
++from PyQt5.QtCore import QByteArray, QEvent, QPointF, QRect, QUrl
++from PyQt5.QtGui import QBrush, QColor, QCursor, QDesktopServices, QMouseEvent, QPainter, QPen, QPolygonF
++from PyQt5.QtWidgets import QAction, QActionGroup, QApplication, QFileDialog, QGraphicsPolygonItem, QGraphicsScene, QGraphicsSimpleTextItem, QGraphicsView, QMainWindow, QMessageBox, QGraphicsItem
+ 
+ from config import *
+ 
+diff --git a/config.py b/config.py
+index fbd57de..e276aa9 100644
+--- a/config.py
++++ b/config.py
+@@ -72,7 +72,7 @@ def load_config(obj, config_format, config):
+ 
+ 
+ def user_config_location(folder_name, file_name):
+-    from qt.core import QSettings
++    from PyQt5.QtCore import QSettings
+     
+     name, ext = _path.splitext(file_name)
+     target = QSettings(QSettings.IniFormat, QSettings.UserScope, folder_name, name).fileName()
+diff --git a/editor.py b/editor.py
+index d5d3d0f..f5f548b 100755
+--- a/editor.py
++++ b/editor.py
+@@ -27,9 +27,9 @@ import os.path
+ import common
+ from common import *
+ 
+-from qt.core import QPoint, QPointF, QRectF, QTimer
+-from qt.gui import QIcon, QKeySequence, QMouseEvent, QPainterPath, QPen, QTransform, QPolygonF
+-from qt.widgets import QDialog, QDialogButtonBox, QFileDialog, QGraphicsPathItem, QGraphicsView, QLabel, QLineEdit, QMessageBox, QShortcut, QVBoxLayout
++from PyQt5.QtCore import QPoint, QPointF, QRectF, QTimer
++from PyQt5.QtGui import QIcon, QKeySequence, QMouseEvent, QPainterPath, QPen, QTransform, QPolygonF
++from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFileDialog, QGraphicsPathItem, QGraphicsView, QLabel, QLineEdit, QMessageBox, QShortcut, QVBoxLayout
+ 
+ 
+ 
+diff --git a/player.py b/player.py
+index 57ee550..925c9d5 100755
+--- a/player.py
++++ b/player.py
+@@ -35,10 +35,10 @@ try:
+ except ImportError:
+     solve = None
+ 
+-from qt import Signal
+-from qt.core import QMargins, QRectF, QTimer
+-from qt.gui import QBrush, QIcon, QKeySequence, QPainter, QPen, QPolygonF, QTransform
+-from qt.widgets import QHBoxLayout, QLabel, QShortcut, QTabBar, QVBoxLayout, QWidget
++from PyQt5.QtCore import pyqtSignal as Signal
++from PyQt5.QtCore import QMargins, QRectF, QTimer
++from PyQt5.QtGui import QBrush, QIcon, QKeySequence, QPainter, QPen, QPolygonF, QTransform
++from PyQt5.QtWidgets import QHBoxLayout, QLabel, QShortcut, QTabBar, QVBoxLayout, QWidget
+ 
+ 
+ @contextlib.contextmanager

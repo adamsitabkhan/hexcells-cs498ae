@@ -1,0 +1,9 @@
+[submodule "external/reference-solver"]
+	path = external/reference-solver
+	url = https://github.com/Ngoguey42/hexcells_solver.git
+[submodule "external/sixcells"]
+	path = external/sixcells
+	url = https://github.com/oprypin/sixcells.git
+[submodule "external/inventory"]
+	path = external/inventory
+	url = https://gist.github.com/a0f661c5cb36180a3a6aca4bb4d385b2.git

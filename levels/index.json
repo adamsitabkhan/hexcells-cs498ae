@@ -1,0 +1,119 @@
+{
+  "10396d852cba065a69efa5d8718f03aa": {
+    "name": "Spooky Halloween Puzzle",
+    "author": "Xavier Shay",
+    "cells": 65,
+    "category": "small",
+    "slug": "spooky-halloween-puzzle",
+    "path": "small/spooky-halloween-puzzle",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "243324dfec20338e3f4b05debbe9c410": {
+    "name": "1 2 Buckle my Shoe",
+    "author": "PteranodonC",
+    "cells": 138,
+    "category": "medium",
+    "slug": "1-2-buckle-my-shoe",
+    "path": "medium/1-2-buckle-my-shoe",
+    "parse_note": "[parser error: Bad alignment; raw cell estimate used]"
+  },
+  "3aad454346403f6a8e3bea6fab0036e9": {
+    "name": "Black 4 More",
+    "author": "Victorious5555",
+    "cells": 96,
+    "category": "small",
+    "slug": "black-4-more",
+    "path": "small/black-4-more",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "447456d9d8df514714a86ef17d87611f": {
+    "name": "3 4 Open the Door",
+    "author": "PteranodonC",
+    "cells": 138,
+    "category": "medium",
+    "slug": "3-4-open-the-door",
+    "path": "medium/3-4-open-the-door",
+    "parse_note": "[parser error: Bad alignment; raw cell estimate used]"
+  },
+  "4968ffde002a9dc8ca0917365e818d8a": {
+    "name": "Deformed hexes",
+    "author": "Piterusz",
+    "cells": 73,
+    "category": "small",
+    "slug": "deformed-hexes",
+    "path": "small/deformed-hexes",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "73884f4a80b2e2a6de3b58936c595f43": {
+    "name": "4 Blue",
+    "author": "Victorious5555",
+    "cells": 47,
+    "category": "small",
+    "slug": "4-blue",
+    "path": "small/4-blue",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "8d9226be2d388abcfa30ad270c97f2d8": {
+    "name": "A Big P",
+    "author": "Piterusz",
+    "cells": 117,
+    "category": "medium",
+    "slug": "a-big-p",
+    "path": "medium/a-big-p",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "a7247f7b6ee1f38ae5c61074c9a89b76": {
+    "name": "MAGIC001",
+    "author": "Magic",
+    "cells": 33,
+    "category": "small",
+    "slug": "magic001",
+    "path": "small/magic001",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "ad5892647cf1cca81326449bd53bb4ea": {
+    "name": "Black 4",
+    "author": "Victorious5555",
+    "cells": 64,
+    "category": "small",
+    "slug": "black-4",
+    "path": "small/black-4",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "b54a601f7cb131554c96d09f432d0977": {
+    "name": "Hexagone",
+    "author": "Piterusz",
+    "cells": 36,
+    "category": "small",
+    "slug": "hexagone",
+    "path": "small/hexagone",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "c5052fc5718333bd92c48c4dbc541e9c": {
+    "name": "4 Blue Daba Dee Daba Dy",
+    "author": "Victorious5555",
+    "cells": 95,
+    "category": "small",
+    "slug": "4-blue-daba-dee-daba-dy",
+    "path": "small/4-blue-daba-dee-daba-dy",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "db526337905c5c7504ab73c5be8d64f9": {
+    "name": "Mirror Mirror",
+    "author": "Victorious5555",
+    "cells": 214,
+    "category": "medium",
+    "slug": "mirror-mirror",
+    "path": "medium/mirror-mirror",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  },
+  "e4a52dadf70687f4296a04ed53d8746f": {
+    "name": "Colonial Regression Target",
+    "author": "ps",
+    "cells": 89,
+    "category": "small",
+    "slug": "colonial-regression-target",
+    "path": "small/colonial-regression-target",
+    "parse_note": "[parser error: Line length expected 66, got 70; raw cell estimate used]"
+  }
+}

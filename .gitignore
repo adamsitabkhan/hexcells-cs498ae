@@ -1,0 +1,24 @@
+# Project-specific ignores
+docs/overview.txt
+docs/proposal.txt
+venv/
+cache_reqwest/
+project/exact/
+
+# Benchmark and analysis output — regenerable, not source
+testing/runs.jsonl
+testing/plots/
+
+# Generated GIFs from solver visualisation
+*.gif
+
+# Generation provenance index — regenerable via generate_batch.py
+levels/generated/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS
+.DS_Store

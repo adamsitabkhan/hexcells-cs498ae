@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexcells Gurobi Formulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(20, 27, 45, 0.6);
+            --hex-black: #1e293b;
+            --hex-blue: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #8b5cf6;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.12), transparent 30%),
+                radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.12), transparent 30%);
+            background-attachment: fixed;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem 1rem;
+        }
+        h1 { font-size: 2.8rem; font-weight: 700; margin-bottom: 0.5rem; 
+             background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+             -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p.subtitle { color: var(--text-muted); font-size: 1.1rem; }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        /* Top half: Visualization */
+        .visualization-area {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .grid-container {
+            flex: 1;
+            min-width: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        svg {
+            overflow: visible;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
+        }
+
+        .hex {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            stroke: var(--bg-color);
+            stroke-width: 2;
+        }
+        
+        .hex:hover {
+            stroke: var(--text-main);
+            stroke-width: 3;
+            transform: scale(1.08);
+            z-index: 10;
+        }
+
+        .hex.black { fill: var(--hex-black); }
+        .hex.blue { fill: var(--hex-blue); filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.7)); }
+        .hex.line { fill: transparent; stroke: var(--hex-black); stroke-width: 3; stroke-dasharray: 4; }
+
+        .hex-text {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            fill: var(--text-main);
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+            font-size: 18px;
+        }
+        
+        .hex-coords {
+            font-family: 'Fira Code', monospace;
+            font-size: 9px;
+            fill: #cbd5e1;
+            text-anchor: middle;
+            dominant-baseline: hanging;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+        }
+        
+        .hex-group:hover .hex-coords {
+            opacity: 1;
+        }
+        
+        /* Highlight animation for scopes */
+        .hex-group.highlight-scope .hex {
+            stroke: var(--accent);
+            stroke-width: 4;
+            stroke-dasharray: 6;
+            animation: dash 3s linear infinite;
+        }
+        
+        .hex-group.highlight-scope .hex.blue {
+            fill: #fcd34d; /* change mine color when highlighted */
+            filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.8));
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -50; }
+        }
+
+        /* Bottom half: Constraint Cards */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+        
+        #card-anywhere:hover::before { background: #38bdf8; }
+        #card-together:hover::before { background: #f59e0b; }
+        #card-separated:hover::before { background: #ef4444; }
+        #card-line:hover::before { background: #10b981; }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modifier-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card h2 { font-size: 1.3rem; color: var(--text-main); }
+        .card-body { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; flex-grow: 1; }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            line-height: 1.4;
+        }
+        
+        .math { color: #a78bfa; }
+        .var { color: #38bdf8; }
+        .comment { color: #64748b; font-style: italic; }
+        
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Hexcells ↔ Gurobi Mapping</h1>
+        <p class="subtitle">Interactive visual bridge between game mechanics and integer programming formulation.</p>
+    </header>
+
+    <div class="container">
+        <!-- Top Half: Interactive SVG Grid -->
+        <div class="visualization-area">
+            <div class="grid-container" id="grid">
+                <!-- SVG injected by JS -->
+            </div>
+            
+            <!-- Legend Panel -->
+            <div class="card" style="max-width: 320px; align-self: flex-start;">
+                <h2>Interactive Board</h2>
+                <p class="card-body">Hover over any cell or constraint card to see its <code>[q, r, s]</code> cube coordinates and visual scope.</p>
+                <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.8rem;">
+                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                        <div style="width: 20px; height: 20px; background: var(--hex-black); border-radius: 4px;"></div> 
+                        <span style="font-size: 0.95rem; color: var(--text-muted);">Empty Cell ($x_c = 0$)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                        <div style="width: 20px; height: 20px; background: var(--hex-blue); border-radius: 4px; box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);"></div> 
+                        <span style="font-size: 0.95rem; color: var(--text-muted);">Mine Cell ($x_c = 1$)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.8rem; margin-top: 0.5rem;">
+                        <div style="width: 20px; height: 20px; border: 2px dashed var(--accent); border-radius: 4px;"></div> 
+                        <span style="font-size: 0.95rem; color: var(--text-muted);">Hover Scope Highlight</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Half: Constraint Explanations -->
+        <div class="cards-container">
+            
+            <!-- ANYWHERE -->
+            <div class="card" id="card-anywhere" onmouseenter="highlightScope('-1,1,0')" onmouseleave="clearHighlight()">
+                <div class="card-header">
+                    <h2>Standard Hint</h2>
+                    <span class="modifier-badge" style="background: rgba(56, 189, 248, 0.2); color: #7dd3fc;">Anywhere</span>
+                </div>
+                <div class="card-body">
+                    <p>Displays a plain number (e.g., <strong>1</strong>). Means exactly 1 mine exists in the 6 adjacent cells, in any configuration.</p>
+                </div>
+                <div class="code-block">
+                    <span class="comment"># Gurobi Base Constraint</span><br>
+                    <span class="var">scope_vars</span> = [x[c] for c in hint.scope]<br>
+                    model.addConstr(gp.quicksum(<span class="var">scope_vars</span>) == <span class="math">1</span>)
+                </div>
+            </div>
+
+            <!-- TOGETHER -->
+            <div class="card" id="card-together" onmouseenter="highlightScope('0,0,0')" onmouseleave="clearHighlight()">
+                <div class="card-header">
+                    <h2>Contiguous Hint</h2>
+                    <span class="modifier-badge" style="background: rgba(245, 158, 11, 0.2); color: #fcd34d;">Together { }</span>
+                </div>
+                <div class="card-body">
+                    <p>Displays brackets (e.g., <strong>{2}</strong>). The mines must form a single unbroken chain. We encode this by counting transitions (0 to 1) in the circular scope.</p>
+                </div>
+                <div class="code-block">
+                    <span class="comment"># Exactly 1 block = 2 transitions</span><br>
+                    <span class="var">W</span> = [abs(y[i] - y[i+1]) for i in ring]<br>
+                    model.addConstr(gp.quicksum(<span class="var">W</span>) == <span class="math">2</span>)
+                </div>
+            </div>
+
+            <!-- SEPARATED -->
+            <div class="card" id="card-separated" onmouseenter="highlightScope('1,-1,0')" onmouseleave="clearHighlight()">
+                <div class="card-header">
+                    <h2>Separated Hint</h2>
+                    <span class="modifier-badge" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">Separated - -</span>
+                </div>
+                <div class="card-body">
+                    <p>Displays dashes (e.g., <strong>-2-</strong>). The mines cannot all be adjacent. This forces multiple blocks, meaning 4 or more transitions in the circular scope.</p>
+                </div>
+                <div class="code-block">
+                    <span class="comment"># >1 block = 4 or more transitions</span><br>
+                    <span class="var">W</span> = [abs(y[i] - y[i+1]) for i in ring]<br>
+                    model.addConstr(gp.quicksum(<span class="var">W</span>) >= <span class="math">4</span>)
+                </div>
+            </div>
+            
+            <!-- LINE -->
+            <div class="card" id="card-line" onmouseenter="highlightScope('-2,3,-1', 'line')" onmouseleave="clearHighlight()">
+                <div class="card-header">
+                    <h2>Column Constraint</h2>
+                    <span class="modifier-badge" style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7;">Line { }</span>
+                </div>
+                <div class="card-body">
+                    <p>Constrains an entire line of cells across the board. Uses the same transition logic for contiguous/separated, but pads the sequence with <code>0</code>s at both ends.</p>
+                </div>
+                <div class="code-block">
+                    <span class="comment"># Pad sequence with fixed 0 boundaries</span><br>
+                    <span class="var">Y</span> = [0] + scope_vars + [0]<br>
+                    <span class="var">W</span> = [abs(Y[i] - Y[i+1]) for i in len(Y)-1]<br>
+                    model.addConstr(gp.quicksum(<span class="var">W</span>) == <span class="math">2</span>)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const size = 35;
+        const sqrt3 = Math.sqrt(3);
+        
+        // Custom level instance mapped precisely to solve constraints
+        const cells = [
+            // Center (TOGETHER hint)
+            {q: 0, r: 0, s: 0, type: 'black', text: '{2}', id: '0,0,0'},
+            
+            // Neighbors for center
+            {q: 1, r: 0, s: -1, type: 'blue', id: '1,0,-1'}, // mine 1
+            {q: 0, r: 1, s: -1, type: 'blue', id: '0,1,-1'}, // mine 2 (contiguous to 1)
+            {q: -1, r: 1, s: 0, type: 'black', text: '1', id: '-1,1,0'}, // ANYWHERE hint
+            {q: -1, r: 0, s: 1, type: 'black', id: '-1,0,1'},
+            {q: 0, r: -1, s: 1, type: 'black', id: '0,-1,1'},
+            
+            // SEPARATED hint
+            {q: 1, r: -1, s: 0, type: 'black', text: '-2-', id: '1,-1,0'}, 
+            
+            // Neighbors of SEPARATED hint
+            {q: 1, r: -2, s: 1, type: 'blue', id: '1,-2,1'}, // mine (separated from the 1,0,-1 mine by 2,-2,0)
+            {q: 2, r: -2, s: 0, type: 'black', id: '2,-2,0'},
+            {q: 2, r: -1, s: -1, type: 'black', id: '2,-1,-1'}, 
+            
+            // Neighbors for ANYWHERE hint (-1, 1, 0)
+            {q: -2, r: 2, s: 0, type: 'black', id: '-2,2,0'},
+            {q: -2, r: 1, s: 1, type: 'black', id: '-2,1,1'},
+            {q: -1, r: 2, s: -1, type: 'black', id: '-1,2,-1'},
+            
+            // LINE hint (points across s=-1 column)
+            {q: -2, r: 3, s: -1, type: 'line', text: '{2}', id: '-2,3,-1'}
+        ];
+
+        function getHexPoints(cx, cy, size) {
+            let points = [];
+            for (let i = 0; i < 6; i++) {
+                // Pointy topped hex
+                let angle_deg = 60 * i - 30;
+                let angle_rad = Math.PI / 180 * angle_deg;
+                points.push(`${cx + size * Math.cos(angle_rad)},${cy + size * Math.sin(angle_rad)}`);
+            }
+            return points.join(' ');
+        }
+
+        function cubeToPixel(q, r) {
+            const x = size * sqrt3 * (q + r/2);
+            const y = size * 3/2 * r;
+            return {x, y};
+        }
+
+        // Setup SVG
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("width", "500");
+        svg.setAttribute("height", "400");
+        svg.setAttribute("viewBox", "-180 -150 400 350");
+
+        // Render cells
+        cells.forEach(c => {
+            const {x, y} = cubeToPixel(c.q, c.r);
+            const g = document.createElementNS(svgNS, "g");
+            g.classList.add("hex-group");
+            g.setAttribute("id", `hex-${c.id}`);
+            
+            const poly = document.createElementNS(svgNS, "polygon");
+            poly.setAttribute("points", getHexPoints(x, y, size - 2));
+            poly.classList.add("hex", c.type);
+            g.appendChild(poly);
+
+            if (c.text) {
+                const text = document.createElementNS(svgNS, "text");
+                text.setAttribute("x", x);
+                text.setAttribute("y", y);
+                text.classList.add("hex-text");
+                // Shift text up slightly if it's a line hint with direction
+                if(c.type === 'line') text.setAttribute("y", y - 5);
+                text.textContent = c.text;
+                g.appendChild(text);
+                
+                if(c.type === 'line') {
+                    // Draw a small arrow pointing Up-Right (+q, -r)
+                    const arrow = document.createElementNS(svgNS, "polygon");
+                    arrow.setAttribute("points", `${x-5},${y+10} ${x+5},${y+10} ${x},${y+18}`);
+                    arrow.setAttribute("fill", "var(--hex-black)");
+                    // rotate arrow to point Up-Right (60 degrees)
+                    arrow.setAttribute("transform", `rotate(-120 ${x} ${y+14})`);
+                    g.appendChild(arrow);
+                }
+            }
+            
+            const coordsText = document.createElementNS(svgNS, "text");
+            coordsText.setAttribute("x", x);
+            coordsText.setAttribute("y", y + size/2 + 8);
+            coordsText.classList.add("hex-coords");
+            coordsText.textContent = `[${c.q}, ${c.r}, ${c.s}]`;
+            g.appendChild(coordsText);
+
+            svg.appendChild(g);
+        });
+
+        document.getElementById("grid").appendChild(svg);
+
+        // Scope Hover Interaction
+        function getNeighbors6(q, r, s) {
+            return [
+                `${q},${r-1},${s+1}`, `${q+1},${r-1},${s}`, `${q+1},${r},${s-1}`,
+                `${q},${r+1},${s-1}`, `${q-1},${r+1},${s}`, `${q-1},${r},${s+1}`
+            ];
+        }
+
+        window.highlightScope = function(hintId, hintType = 'zone6') {
+            const hint = cells.find(c => c.id === hintId);
+            if(!hint) return;
+            
+            let scopeIds = [];
+            if (hintType === 'line') {
+                // Line scope mapping (Up-Right means q increases, r decreases, s is constant)
+                for(let i=1; i<=4; i++) {
+                    scopeIds.push(`${hint.q + i},${hint.r - i},${hint.s}`);
+                }
+            } else {
+                scopeIds = getNeighbors6(hint.q, hint.r, hint.s);
+            }
+            
+            // Highlight the hint cell itself with a special glow
+            const hintEl = document.getElementById(`hex-${hintId}`);
+            if(hintEl) {
+                hintEl.querySelector('.hex').style.stroke = '#fff';
+            }
+
+            // Highlight scope cells
+            scopeIds.forEach(id => {
+                const el = document.getElementById(`hex-${id}`);
+                if(el) el.classList.add('highlight-scope');
+            });
+        };
+
+        window.clearHighlight = function() {
+            document.querySelectorAll('.highlight-scope').forEach(el => {
+                el.classList.remove('highlight-scope');
+            });
+            document.querySelectorAll('.hex').forEach(el => {
+                el.style.stroke = '';
+            });
+        };
+    </script>
+</body>
+</html>
